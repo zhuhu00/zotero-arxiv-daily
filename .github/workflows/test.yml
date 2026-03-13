@@ -29,6 +29,15 @@ jobs:
         run: |
           export DEBUG=true
           printf "%b\n" "$CUSTOM_CONFIG" > config/custom.yaml
+          echo "========"
+          echo $ZOTERO_ID
+          echo $ZOTERO_KEY
+          echo $SENDER
+          echo $RECEIVER
+          echo $SENDER_PASSWORD
+          echo $OPENAI_API_KEY
+          echo $OPENAI_API_BASE
+          echo "========"
           echo "Use custom config: "
           cat config/custom.yaml
           uv run src/zotero_arxiv_daily/main.py
