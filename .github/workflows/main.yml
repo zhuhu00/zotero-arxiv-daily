@@ -1,8 +1,18 @@
 name: Send emails daily
 on:
   workflow_dispatch:
+    inputs:
+      checkout_ref:
+        description: Optional repository ref for a manual validation run
+        required: false
+        type: string
   schedule:
     - cron: '0 22 * * *'
+    - cron: '0 4 * * *'
+
+concurrency:
+  group: daily-recommendations
+  cancel-in-progress: false
 
 jobs:
   calculate-and-send:
@@ -12,7 +22,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: ${{ vars.REPOSITORY }}
-          ref: ${{ vars.REF }}
+          ref: ${{ inputs.checkout_ref || vars.REF }}
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v7
@@ -31,4 +41,17 @@ jobs:
           printf "%b\n" "$CUSTOM_CONFIG" > config/custom.yaml
           echo "Use custom config: "
           cat config/custom.yaml
-          uv run src/zotero_arxiv_daily/main.py
+          uv run src/zotero_arxiv_daily/main.py \
+            executor.max_paper_num=10 \
+            email.enabled=false \
+            source.arxiv.extract_full_text=false \
+            manifest.enabled=true \
+            manifest.limit=10
+
+      - name: Upload daily recommendations
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-recommendations-${{ github.run_id }}
+          path: daily-recommendations.json
+          if-no-files-found: error
+          retention-days: 30

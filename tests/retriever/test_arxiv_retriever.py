@@ -1,9 +1,10 @@
 """Tests for ArxivRetriever."""
 
 import time
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
-import feedparser
+import pytest
 
 from zotero_arxiv_daily.retriever.arxiv_retriever import ArxivRetriever, _run_with_hard_timeout
 import zotero_arxiv_daily.retriever.arxiv_retriever as arxiv_retriever
@@ -28,8 +29,6 @@ def test_arxiv_retriever(config, mock_feedparser, monkeypatch):
         e for e in mock_feedparser.entries
         if e.get("arxiv_announce_type", "new") == "new"
     ]
-    paper_ids = [e.id.removeprefix("oai:arXiv.org:") for e in new_entries]
-
     # Build fake ArxivResult-like objects matching each RSS entry
     fake_results = []
     for entry in new_entries:
@@ -41,6 +40,7 @@ def test_arxiv_retriever(config, mock_feedparser, monkeypatch):
             pdf_url=f"https://arxiv.org/pdf/{pid}",
             entry_id=f"https://arxiv.org/abs/{pid}",
             source_url=lambda pid=pid: f"https://arxiv.org/e-print/{pid}",
+            published=datetime(2026, 8, 17, tzinfo=timezone.utc),
         ))
 
     class FakeClient:
@@ -61,6 +61,37 @@ def test_arxiv_retriever(config, mock_feedparser, monkeypatch):
 
     assert len(papers) == len(new_entries)
     assert set(p.title for p in papers) == set(e.title for e in new_entries)
+    assert all(p.source_id and p.source_id.endswith("v1") for p in papers)
+    assert all(p.base_id == p.source_id.removesuffix("v1") for p in papers)
+    assert all(p.version == 1 for p in papers)
+    assert all(p.published_at == datetime(2026, 8, 17, tzinfo=timezone.utc) for p in papers)
+
+
+def test_arxiv_retriever_can_skip_candidate_full_text(config, monkeypatch):
+    from omegaconf import open_dict
+
+    with open_dict(config):
+        config.source.arxiv.extract_full_text = False
+
+    raw_paper = SimpleNamespace(
+        title="Lightweight candidate",
+        authors=[SimpleNamespace(name="Test Author")],
+        summary="Abstract only",
+        pdf_url="https://arxiv.org/pdf/2608.12345v2",
+        entry_id="https://arxiv.org/abs/2608.12345v2",
+        published=datetime(2026, 8, 17, tzinfo=timezone.utc),
+    )
+    monkeypatch.setattr(
+        arxiv_retriever,
+        "extract_text_from_tar",
+        lambda paper: pytest.fail("full text extraction must be skipped"),
+    )
+    paper = ArxivRetriever(config).convert_to_paper(raw_paper)
+
+    assert paper.full_text is None
+    assert paper.source_id == "2608.12345v2"
+    assert paper.base_id == "2608.12345"
+    assert paper.version == 2
 
 
 def test_run_with_hard_timeout_returns_value():

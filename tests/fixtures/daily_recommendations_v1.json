@@ -1,0 +1,197 @@
+{
+  "candidate_count": 12,
+  "categories": [
+    "cs.RO",
+    "cs.CV"
+  ],
+  "generated_at": "2026-08-17T04:00:00Z",
+  "limit": 10,
+  "papers": [
+    {
+      "abstract": "Fixture abstract 1.",
+      "authors": [
+        "Author 1"
+      ],
+      "base_id": "2608.00001",
+      "entry_url": "https://arxiv.org/abs/2608.00001v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00001v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00001v1",
+      "rank": 1,
+      "score": 1,
+      "source": "arxiv",
+      "source_id": "2608.00001v1",
+      "title": "Fixture Paper 1",
+      "tldr": "这是第 1 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 2.",
+      "authors": [
+        "Author 2"
+      ],
+      "base_id": "2608.00002",
+      "entry_url": "https://arxiv.org/abs/2608.00002v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00002v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00002v1",
+      "rank": 2,
+      "score": 0.95,
+      "source": "arxiv",
+      "source_id": "2608.00002v1",
+      "title": "Fixture Paper 2",
+      "tldr": "这是第 2 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 3.",
+      "authors": [
+        "Author 3"
+      ],
+      "base_id": "2608.00003",
+      "entry_url": "https://arxiv.org/abs/2608.00003v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00003v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00003v1",
+      "rank": 3,
+      "score": 0.9,
+      "source": "arxiv",
+      "source_id": "2608.00003v1",
+      "title": "Fixture Paper 3",
+      "tldr": "这是第 3 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 4.",
+      "authors": [
+        "Author 4"
+      ],
+      "base_id": "2608.00004",
+      "entry_url": "https://arxiv.org/abs/2608.00004v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00004v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00004v1",
+      "rank": 4,
+      "score": 0.85,
+      "source": "arxiv",
+      "source_id": "2608.00004v1",
+      "title": "Fixture Paper 4",
+      "tldr": "这是第 4 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 5.",
+      "authors": [
+        "Author 5"
+      ],
+      "base_id": "2608.00005",
+      "entry_url": "https://arxiv.org/abs/2608.00005v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00005v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00005v1",
+      "rank": 5,
+      "score": 0.8,
+      "source": "arxiv",
+      "source_id": "2608.00005v1",
+      "title": "Fixture Paper 5",
+      "tldr": "这是第 5 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 6.",
+      "authors": [
+        "Author 6"
+      ],
+      "base_id": "2608.00006",
+      "entry_url": "https://arxiv.org/abs/2608.00006v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00006v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00006v1",
+      "rank": 6,
+      "score": 0.75,
+      "source": "arxiv",
+      "source_id": "2608.00006v1",
+      "title": "Fixture Paper 6",
+      "tldr": "这是第 6 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 7.",
+      "authors": [
+        "Author 7"
+      ],
+      "base_id": "2608.00007",
+      "entry_url": "https://arxiv.org/abs/2608.00007v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00007v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00007v1",
+      "rank": 7,
+      "score": 0.7,
+      "source": "arxiv",
+      "source_id": "2608.00007v1",
+      "title": "Fixture Paper 7",
+      "tldr": "这是第 7 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 8.",
+      "authors": [
+        "Author 8"
+      ],
+      "base_id": "2608.00008",
+      "entry_url": "https://arxiv.org/abs/2608.00008v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00008v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00008v1",
+      "rank": 8,
+      "score": 0.65,
+      "source": "arxiv",
+      "source_id": "2608.00008v1",
+      "title": "Fixture Paper 8",
+      "tldr": "这是第 8 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 9.",
+      "authors": [
+        "Author 9"
+      ],
+      "base_id": "2608.00009",
+      "entry_url": "https://arxiv.org/abs/2608.00009v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00009v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00009v1",
+      "rank": 9,
+      "score": 0.6,
+      "source": "arxiv",
+      "source_id": "2608.00009v1",
+      "title": "Fixture Paper 9",
+      "tldr": "这是第 9 篇测试论文的中文摘要。",
+      "version": 1
+    },
+    {
+      "abstract": "Fixture abstract 10.",
+      "authors": [
+        "Author 10"
+      ],
+      "base_id": "2608.00010",
+      "entry_url": "https://arxiv.org/abs/2608.00010v1",
+      "pdf_url": "https://arxiv.org/pdf/2608.00010v1",
+      "published_at": "2026-08-16T00:00:00Z",
+      "queue_key": "arxiv:2608.00010v1",
+      "rank": 10,
+      "score": 0.55,
+      "source": "arxiv",
+      "source_id": "2608.00010v1",
+      "title": "Fixture Paper 10",
+      "tldr": "这是第 10 篇测试论文的中文摘要。",
+      "version": 1
+    }
+  ],
+  "producer": {
+    "head_sha": "0123456789abcdef0123456789abcdef01234567",
+    "repository": "zhuhu00/zotero-arxiv-daily",
+    "workflow_run_id": 31846447439
+  },
+  "schema": "paper2video.daily-recommendations/v1"
+}

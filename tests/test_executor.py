@@ -1,6 +1,8 @@
 """Tests for zotero_arxiv_daily.executor: normalize_path_patterns, filter_corpus, fetch_zotero_corpus, E2E."""
 
 from datetime import datetime
+import json
+from types import SimpleNamespace
 
 import pytest
 from omegaconf import OmegaConf
@@ -155,7 +157,6 @@ def test_run_end_to_end(config, monkeypatch):
     from omegaconf import open_dict
 
     from tests.canned_responses import (
-        make_sample_corpus,
         make_sample_paper,
         make_stub_openai_client,
         make_stub_smtp,
@@ -281,3 +282,81 @@ def test_run_no_papers_send_empty_true(config, monkeypatch):
     assert len(sent) == 1, "Email should be sent even with no papers when send_empty=true"
     _, _, body = sent[0]
     assert "text/html" in body
+
+
+def _manifest_executor(config, papers):
+    from tests.canned_responses import make_sample_corpus, make_stub_openai_client
+
+    executor = Executor.__new__(Executor)
+    executor.config = config
+    executor.retrievers = {"arxiv": SimpleNamespace(retrieve_papers=lambda: papers)}
+    executor.reranker = SimpleNamespace(rerank=lambda candidates, corpus: candidates)
+    executor.openai_client = make_stub_openai_client()
+    executor.fetch_zotero_corpus = lambda: make_sample_corpus(1)
+    executor.filter_corpus = lambda corpus: corpus
+    return executor
+
+
+def _set_manifest_environment(monkeypatch):
+    monkeypatch.setenv("GITHUB_REPOSITORY", "zhuhu00/zotero-arxiv-daily")
+    monkeypatch.setenv("GITHUB_RUN_ID", "31846447439")
+    monkeypatch.setenv("GITHUB_SHA", "0123456789abcdef0123456789abcdef01234567")
+
+
+def test_run_writes_manifest_without_sending_email(config, monkeypatch, tmp_path):
+    from datetime import timezone
+
+    from omegaconf import open_dict
+
+    from tests.canned_responses import make_sample_paper
+
+    output_path = tmp_path / "daily-recommendations.json"
+    with open_dict(config):
+        config.email.enabled = False
+        config.manifest.enabled = True
+        config.manifest.output_path = str(output_path)
+        config.manifest.limit = 10
+        config.executor.max_paper_num = 10
+        config.source.arxiv.category = ["cs.RO", "cs.CV"]
+
+    paper = make_sample_paper(
+        source_id="2608.12345v1",
+        base_id="2608.12345",
+        version=1,
+        published_at=datetime(2026, 8, 17, tzinfo=timezone.utc),
+        url="https://arxiv.org/abs/2608.12345v1",
+        pdf_url="https://arxiv.org/pdf/2608.12345v1",
+        score=0.75,
+    )
+    _set_manifest_environment(monkeypatch)
+    monkeypatch.setattr(
+        "zotero_arxiv_daily.executor.send_email",
+        lambda *args: pytest.fail("email must be disabled"),
+    )
+
+    _manifest_executor(config, [paper]).run()
+
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["categories"] == ["cs.RO", "cs.CV"]
+    assert payload["papers"][0]["queue_key"] == "arxiv:2608.12345v1"
+    assert payload["papers"][0]["tldr"]
+
+
+def test_run_writes_empty_manifest_on_empty_day(config, monkeypatch, tmp_path):
+    from omegaconf import open_dict
+
+    output_path = tmp_path / "daily-recommendations.json"
+    with open_dict(config):
+        config.email.enabled = False
+        config.manifest.enabled = True
+        config.manifest.output_path = str(output_path)
+        config.manifest.limit = 10
+        config.executor.send_empty = False
+        config.source.arxiv.category = ["cs.RO", "cs.CV"]
+
+    _set_manifest_environment(monkeypatch)
+    _manifest_executor(config, []).run()
+
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["candidate_count"] == 0
+    assert payload["papers"] == []

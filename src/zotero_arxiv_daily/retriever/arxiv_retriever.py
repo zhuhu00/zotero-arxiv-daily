@@ -13,8 +13,13 @@ from time import sleep
 from typing import Any, Callable, TypeVar
 from loguru import logger
 import requests
+import re
 
 T = TypeVar("T")
+
+ARXIV_ID_PATTERN = re.compile(
+    r"^(?P<base>(?:\d{4}\.\d{4,5}|[A-Za-z.-]+/\d{7}))v(?P<version>[1-9]\d*)$"
+)
 
 DOWNLOAD_TIMEOUT = (10, 60)
 PDF_EXTRACT_TIMEOUT = 180
@@ -157,24 +162,46 @@ class ArxivRetriever(BaseRetriever):
         return raw_papers
 
     def convert_to_paper(self, raw_paper: ArxivResult) -> Paper:
+        source_id = _extract_arxiv_id(raw_paper)
+        match = ARXIV_ID_PATTERN.fullmatch(source_id)
+        if match is None:
+            raise ValueError(f"Invalid versioned arXiv ID: {source_id}")
+
         title = raw_paper.title
         authors = [a.name for a in raw_paper.authors]
         abstract = raw_paper.summary
-        pdf_url = raw_paper.pdf_url
-        full_text = extract_text_from_tar(raw_paper)
-        if full_text is None:
-            full_text = extract_text_from_html(raw_paper)
-        if full_text is None:
-            full_text = extract_text_from_pdf(raw_paper)
+        full_text = None
+        if self.config.source.arxiv.get("extract_full_text", True):
+            full_text = extract_text_from_tar(raw_paper)
+            if full_text is None:
+                full_text = extract_text_from_html(raw_paper)
+            if full_text is None:
+                full_text = extract_text_from_pdf(raw_paper)
         return Paper(
             source=self.name,
             title=title,
             authors=authors,
             abstract=abstract,
-            url=raw_paper.entry_id,
-            pdf_url=pdf_url,
+            url=f"https://arxiv.org/abs/{source_id}",
+            pdf_url=f"https://arxiv.org/pdf/{source_id}",
             full_text=full_text,
+            source_id=source_id,
+            base_id=match.group("base"),
+            version=int(match.group("version")),
+            published_at=getattr(raw_paper, "published", None),
         )
+
+
+def _extract_arxiv_id(raw_paper: ArxivResult) -> str:
+    get_short_id = getattr(raw_paper, "get_short_id", None)
+    if callable(get_short_id):
+        source_id = get_short_id()
+    else:
+        marker = "/abs/"
+        if marker not in raw_paper.entry_id:
+            raise ValueError(f"Cannot extract arXiv ID from {raw_paper.entry_id}")
+        source_id = raw_paper.entry_id.split(marker, 1)[1]
+    return source_id.split("?", 1)[0].split("#", 1)[0].rstrip("/")
 
 
 def extract_text_from_html(paper: ArxivResult) -> str | None:
