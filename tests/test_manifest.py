@@ -74,6 +74,35 @@ def test_build_manifest_selects_exactly_ten_from_larger_candidate_set():
     assert len(payload["papers"]) == 10
 
 
+@pytest.mark.parametrize("limit", [3, 25])
+def test_build_manifest_accepts_configurable_positive_limit(limit):
+    payload = build_manifest(
+        _ranked_papers(limit),
+        candidate_count=limit + 2,
+        categories=["cs.RO", "cs.CV"],
+        producer=PRODUCER,
+        generated_at=GENERATED_AT,
+        limit=limit,
+    )
+
+    assert payload["limit"] == limit
+    assert len(payload["papers"]) == limit
+    validate_manifest(payload)
+
+
+@pytest.mark.parametrize("limit", [0, -1, True])
+def test_build_manifest_rejects_non_positive_or_boolean_limit(limit):
+    with pytest.raises(ManifestValidationError, match="positive integer"):
+        build_manifest(
+            [],
+            candidate_count=0,
+            categories=["cs.RO", "cs.CV"],
+            producer=PRODUCER,
+            generated_at=GENERATED_AT,
+            limit=limit,
+        )
+
+
 def test_manifest_serialization_is_deterministic_and_refuses_overwrite(tmp_path):
     payload = build_manifest(
         _ranked_papers(2),

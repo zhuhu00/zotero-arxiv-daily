@@ -83,8 +83,8 @@ def build_manifest(
     generated_at: datetime,
     limit: int = 10,
 ) -> dict[str, Any]:
-    if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 10:
-        raise ManifestValidationError("limit must be an integer between 1 and 10")
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit <= 0:
+        raise ManifestValidationError("limit must be a positive integer")
     if not isinstance(candidate_count, int) or isinstance(candidate_count, bool) or candidate_count < 0:
         raise ManifestValidationError("candidate_count must be a non-negative integer")
     if len(papers) != min(limit, candidate_count):
@@ -192,8 +192,8 @@ def validate_manifest(payload: dict[str, Any]) -> None:
     ):
         raise ManifestValidationError("categories must be a non-empty list of strings")
     limit = payload["limit"]
-    if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 10:
-        raise ManifestValidationError("limit must be an integer between 1 and 10")
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit <= 0:
+        raise ManifestValidationError("limit must be a positive integer")
     candidate_count = payload["candidate_count"]
     if not isinstance(candidate_count, int) or isinstance(candidate_count, bool) or candidate_count < 0:
         raise ManifestValidationError("candidate_count must be a non-negative integer")

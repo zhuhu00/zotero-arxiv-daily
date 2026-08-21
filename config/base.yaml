@@ -55,4 +55,4 @@ executor:
 manifest:
   enabled: false
   output_path: daily-recommendations.json
-  limit: 10
+  limit: 10 # Positive number of ranked papers to include; the local default is 10.
