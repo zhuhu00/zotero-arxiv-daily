@@ -360,3 +360,51 @@ def test_run_writes_empty_manifest_on_empty_day(config, monkeypatch, tmp_path):
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["candidate_count"] == 0
     assert payload["papers"] == []
+
+
+def test_email_and_manifest_are_same_ranked_top_twenty(config, monkeypatch, tmp_path):
+    from datetime import timedelta, timezone
+
+    from omegaconf import open_dict
+
+    from tests.canned_responses import make_sample_paper
+
+    output_path = tmp_path / "daily-recommendations.json"
+    with open_dict(config):
+        config.email.enabled = True
+        config.manifest.enabled = True
+        config.manifest.output_path = str(output_path)
+        config.manifest.limit = 20
+        config.executor.max_paper_num = 20
+        config.source.arxiv.category = ["cs.RO", "cs.CV"]
+
+    papers = [
+        make_sample_paper(
+            source_id=f"2608.{index:05d}v1",
+            base_id=f"2608.{index:05d}",
+            version=1,
+            published_at=datetime(2026, 8, 17, tzinfo=timezone.utc)
+            + timedelta(minutes=index),
+            url=f"https://arxiv.org/abs/2608.{index:05d}v1",
+            pdf_url=f"https://arxiv.org/pdf/2608.{index:05d}v1",
+            score=float(25 - index),
+        )
+        for index in range(1, 26)
+    ]
+    emailed = []
+    _set_manifest_environment(monkeypatch)
+    monkeypatch.setattr(
+        "zotero_arxiv_daily.executor.render_email",
+        lambda selected: emailed.extend(selected) or "rendered",
+    )
+    monkeypatch.setattr("zotero_arxiv_daily.executor.send_email", lambda *_: None)
+
+    _manifest_executor(config, papers).run()
+
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    manifest_ids = [paper["source_id"] for paper in payload["papers"]]
+    email_ids = [paper.source_id for paper in emailed]
+    expected_ids = [paper.source_id for paper in papers[:20]]
+    assert payload["limit"] == 20
+    assert len(emailed) == 20
+    assert manifest_ids == email_ids == expected_ids

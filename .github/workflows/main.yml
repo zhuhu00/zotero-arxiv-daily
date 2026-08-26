@@ -6,9 +6,13 @@ on:
         description: Optional repository ref for a manual validation run
         required: false
         type: string
+      send_email:
+        description: Send email during this manual validation run
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: '0 22 * * *'
-    - cron: '0 4 * * *'
 
 concurrency:
   group: daily-recommendations
@@ -42,11 +46,10 @@ jobs:
           echo "Use custom config: "
           cat config/custom.yaml
           uv run src/zotero_arxiv_daily/main.py \
-            executor.max_paper_num=10 \
-            email.enabled=false \
-            source.arxiv.extract_full_text=false \
+            executor.max_paper_num=20 \
+            email.enabled=${{ github.event_name == 'schedule' || inputs.send_email }} \
             manifest.enabled=true \
-            manifest.limit=10
+            manifest.limit=20
 
       - name: Upload daily recommendations
         uses: actions/upload-artifact@v4
