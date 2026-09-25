@@ -6,6 +6,7 @@ zotero:
 
 source:
   arxiv:
+    announcement_date: null # Operator-only historical announcement day (YYYY-MM-DD).
     category: null # The categories of target arxiv papers. Find the abbr of your research area from [here](https://arxiv.org/category_taxonomy). Example: ["cs.AI","cs.CV","cs.LG","cs.CL"]
     include_cross_list: false # Whether to include arXiv cross-list papers in subscribed categories. Example: true
     extract_full_text: true # Preserve upstream behavior. Disable to rank and summarize from title/abstract only.

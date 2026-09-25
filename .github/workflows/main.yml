@@ -2,6 +2,10 @@ name: Send emails daily
 on:
   workflow_dispatch:
     inputs:
+      announcement_date:
+        description: Optional past arXiv announcement date (YYYY-MM-DD)
+        required: false
+        type: string
       checkout_ref:
         description: Optional repository ref for a manual validation run
         required: false
@@ -40,12 +44,19 @@ jobs:
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
+          ANNOUNCEMENT_DATE: ${{ inputs.announcement_date }}
           CUSTOM_CONFIG: ${{ vars.CUSTOM_CONFIG }}
         run: |
           printf "%b\n" "$CUSTOM_CONFIG" > config/custom.yaml
           echo "Use custom config: "
           cat config/custom.yaml
+          overrides=()
+          if [[ -n "$ANNOUNCEMENT_DATE" ]]; then
+            [[ "$ANNOUNCEMENT_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || exit 1
+            overrides+=("source.arxiv.announcement_date=$ANNOUNCEMENT_DATE")
+          fi
           uv run src/zotero_arxiv_daily/main.py \
+            "${overrides[@]}" \
             executor.max_paper_num=20 \
             email.enabled=${{ github.event_name == 'schedule' || inputs.send_email }} \
             manifest.enabled=true \
