@@ -184,6 +184,9 @@ class ArxivRetriever(BaseRetriever):
             raise ValueError("category must be specified for arxiv.")
 
     def _retrieve_raw_papers(self) -> list[ArxivResult]:
+        if self.config.source.arxiv.get("announcement_date"):
+            from .arxiv_history import retrieve_history
+            return retrieve_history(self.config)
         query = '+'.join(self.config.source.arxiv.category)
         include_cross_list = self.config.source.arxiv.get("include_cross_list", False)
         rss_url = f"https://rss.arxiv.org/atom/{query}"
